@@ -1,0 +1,15 @@
+# Python
+__pycache__/
+*.py[cod]
+*.class
+
+# C++ binaries and object files
+*.o
+*.obj
+*.so
+*.a
+*.lib
+
+# Build and IDE files
+.vscode/
+.DS_Store
