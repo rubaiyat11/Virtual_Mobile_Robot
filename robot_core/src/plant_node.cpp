@@ -1,14 +1,16 @@
 #include "rclcpp/rclcpp.hpp"
 #include "geometry_msgs/msg/twist.hpp"
+#include <Eigen/Dense>
+#include "mission_interface/msg/robot_state.hpp"
 
 class plant_node : public rclcpp::Node{
 public:
     plant_node() : Node("plant_node"){
-        controller_sub = this->create_subscription<geometry_msgs::msg::Twist>(
+        controller_sub = this->create_subscription<mission_interface::msg::RobotState>(
             "/controller_output", 20, std::bind(&plant_node::control_input_callback, this, std::placeholders::_1)
         );
 
-        plant_state_pub = this->create_publisher<geometry_msgs::msg::Twist>(
+        plant_state_pub = this->create_publisher<mission_interface::msg::RobotState>(
             "/plant_state", 20
         );
 
@@ -19,36 +21,46 @@ public:
 
     }
 private:
-    void control_input_callback(const geometry_msgs::msg::Twist::SharedPtr msg){
-        F = msg->linear.x;   //F: latest_force
+    void control_input_callback(const mission_interface::msg::RobotState::SharedPtr msg){
+        force.x() = msg->force[0];
+        force.y() = msg->force[1];
+        force.z() = msg->force[2];   //F: latest_force
     }
 
     void timer_callback(){
-        geometry_msgs::msg::Twist msg;
+        mission_interface::msg::RobotState msg;
 
-        a = F/m;             //m: mass of system, a: updated_acceleration
-        v = v + a * dt;      //v: velocity, dt: time frame
-        x = x + v * dt;      //x: updated_position
+        acceleration = force/m;             //m: mass of system, a: updated_acceleration
+        velocity = velocity + acceleration * dt;      //v: velocity, dt: time frame
+        position = position + velocity * dt;      //x: updated_position
 
-        msg.linear.x = x;
-        msg.linear.y = v;
-        msg.linear.z = a;
+        msg.position[0] = position.x();
+        msg.position[1] = position.y();
+        msg.position[2] = position.z();
+
+        msg.velocity[0] = velocity.x();
+        msg.velocity[1] = velocity.y();
+        msg.velocity[2] = velocity.z();
+
+        msg.acceleration[0] = acceleration.x();
+        msg.acceleration[1] = acceleration.y();
+        msg.acceleration[2] = acceleration.z();
 
         plant_state_pub->publish(msg);
 
-        RCLCPP_INFO(this->get_logger(), "x: %f", x);
+        RCLCPP_INFO(this->get_logger(), "Pos: x=%f, y=%f, z=%f", position.x(), position.y(), position.z());
     }
 
-    double F = 0.0;
-    double a = 0.0;
-    double v = 0.0;
-    double x = 0.0;
+    Eigen::Vector3d position{0.0, 0.0, 0.0};
+    Eigen::Vector3d velocity{0.0, 0.0, 0.0};
+    Eigen::Vector3d acceleration{0.0, 0.0, 0.0};
+    Eigen::Vector3d force{0.0, 0.0, 0.0};
 
     double m = 1.0;
-    double dt = 0.01;
+    double dt = 0.1;
 
-    rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr controller_sub;
-    rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr plant_state_pub;
+    rclcpp::Subscription<mission_interface::msg::RobotState>::SharedPtr controller_sub;
+    rclcpp::Publisher<mission_interface::msg::RobotState>::SharedPtr plant_state_pub;
     rclcpp::TimerBase::SharedPtr state_pub_timer;       
 };
 
