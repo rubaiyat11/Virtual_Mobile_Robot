@@ -26,10 +26,12 @@ ament_target_dependencies(
 ament_target_dependencies(
   sensor_node
   rclcpp
+  mission_interface
 )
 
 
 target_include_directories(plant_node PUBLIC /usr/include/eigen3)
+target_include_directories(sensor_node PUBLIC /usr/include/eigen3)
 
 install(TARGETS
   plant_node

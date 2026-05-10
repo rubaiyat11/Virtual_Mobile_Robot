@@ -1,7 +1,7 @@
 #include "rclcpp/rclcpp.hpp"
 #include "geometry_msgs/msg/twist.hpp"
-#include <Eigen/Dense>
 #include "mission_interface/msg/robot_state.hpp"
+#include <Eigen/Dense>
 
 class plant_node : public rclcpp::Node{
 public:
