@@ -72,8 +72,3 @@ int main(int argc, char **argv){
     rclcpp::shutdown();
     return 0;
 }
-
-// Takes input from controllers
-// Controllers gives force
-// Plant turns them into velocity and position (real body state)
-// Publishes that to plant state topic for other nodes to uses

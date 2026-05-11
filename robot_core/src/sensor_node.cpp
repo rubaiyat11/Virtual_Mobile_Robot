@@ -46,13 +46,13 @@ private:
 
         double noise_sample = noise(engine);
 
-        measured_position.x() = measured_position.x() + noise_sample;
-        measured_position.y() = measured_position.y() + noise_sample;
-        measured_position.z() = measured_position.z() + noise_sample;
+        measured_position.x() += noise_sample;
+        measured_position.y() += noise_sample;
+        measured_position.z() += noise_sample;
 
-        measured_velocity.x() = measured_velocity.x() + noise_sample;
-        measured_velocity.y() = measured_velocity.x() + noise_sample;
-        measured_velocity.z() = measured_velocity.x() + noise_sample;
+        measured_velocity.x() += noise_sample;
+        measured_velocity.y() += noise_sample;
+        measured_velocity.z() += noise_sample;
 
         msg.measured_position[0] = measured_position.x();
         msg.measured_position[1] = measured_position.y();
