@@ -4,15 +4,15 @@
 #include "mission_interface/msg/desired_state.hpp"
 #include <Eigen/Dense>
 
-class mpc_ctrlr_node : public rclcpp::Node{
+class mpc_controller_node : public rclcpp::Node{
 public:
-    mpc_ctrlr_node() : Node("mpc_ctrlr_node"){
+    mpc_controller_node() : Node("mpc_controller_node"){
         measured_plant_state_sub = this->create_subscription<mission_interface::msg::SensorState>(
-            "/measured_state", 20, std::bind(&mpc_ctrlr_node::measured_state_callback, this, std::placeholders::_1)
+            "/measured_state", 20, std::bind(&mpc_controller_node::measured_state_callback, this, std::placeholders::_1)
         );
 
         target_state_sub = this->create_subscription<mission_interface::msg::TargetState>(
-            "/target_state", 20, std::bind(&mpc_ctrlr_node::target_state_callback, this, std::placeholders::_1)
+            "/target_state", 20, std::bind(&mpc_controller_node::target_state_callback, this, std::placeholders::_1)
         );
 
         mpc_output_pub = this->create_publisher<mission_interface::msg::DesiredState>(
@@ -21,8 +21,40 @@ public:
 
         mpc_pub_timer = this->create_wall_timer(
             std::chrono::milliseconds(10),
-            std::bind(&mpc_ctrlr_node::timer_callback, this)
+            std::bind(&mpc_controller_node::timer_callback, this)
         );
+
+        A <<
+        1,0,0,dt,0,0,
+        0,1,0,0,dt,0,
+        0,0,1,0,0,dt,
+
+        0,0,0,1,0,0,
+        0,0,0,0,1,0,
+        0,0,0,0,0,1;
+
+        B <<
+        0,0,0,
+        0,0,0,
+        0,0,0,
+
+        dt,0,0,
+        0,dt,0,
+        0,0,dt;
+
+        Q <<
+        20,0,0,0,0,0,
+        0,20,0,0,0,0,
+        0,0,20,0,0,0,
+
+        0,0,0,5,0,0,
+        0,0,0,0,5,0,
+        0,0,0,0,0,5;
+
+        R <<
+        0.2,0,0,
+        0,0.2,0,
+        0,0,0.2;
     }
 
 private:
@@ -71,6 +103,7 @@ private:
 
     Eigen::Matrix<double, 6, 6> Q;
     Eigen::Matrix<double, 3, 3> R;
+    
 
     rclcpp::Subscription<mission_interface::msg::SensorState>::SharedPtr measured_plant_state_sub;
     rclcpp::Subscription<mission_interface::msg::TargetState>::SharedPtr target_state_sub;
@@ -82,7 +115,7 @@ private:
 
 int main(int argc, char **argv){
     rclcpp::init(argc, argv);
-    auto node = std::make_shared<mpc_ctrlr_node>();
+    auto node = std::make_shared<mpc_controller_node>();
     rclcpp::spin(node);
     rclcpp::shutdown();
     return 0;

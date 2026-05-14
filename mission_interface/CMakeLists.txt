@@ -14,6 +14,8 @@ find_package(builtin_interfaces REQUIRED)
 rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/RobotState.msg"
   "msg/SensorState.msg"
+  "msg/TargetState.msg"
+  "msg/DesiredState.msg"
   DEPENDENCIES builtin_interfaces geometry_msgs
 )
 
