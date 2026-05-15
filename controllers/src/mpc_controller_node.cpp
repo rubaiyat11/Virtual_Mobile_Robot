@@ -84,16 +84,44 @@ private:
     }
 
     void compute_mpc(){
+        error = x_target - x;
+
+        u = Eigen::Vector3d(
+        error(0) * 2.0,
+        error(1) * 2.0,
+        error(2) * 2.0
+    );
+
+    desired_position = x.head<3>() + x.tail<3>() * dt;
+    desired_velocity = x.tail<3>() + u * dt;
 
     }
 
     void timer_callback(){
 
+        compute_mpc();
+
+        mission_interface::msg::DesiredState msg;
+
+        msg.desired_position[0] = desired_position.x();
+        msg.desired_position[1] = desired_position.y();
+        msg.desired_position[2] = desired_position.z();
+
+        msg.desired_velocity[0] = desired_velocity.x();
+        msg.desired_velocity[1] = desired_velocity.y();
+        msg.desired_velocity[2] = desired_velocity.z();
+
+        msg.desired_acceleration[0] = u(0);
+        msg.desired_acceleration[1] = u(1);
+        msg.desired_acceleration[2] = u(2);
+
+        mpc_output_pub->publish(msg);
     }
 
 
     double dt = 0.01;
 
+    Eigen::Matrix<double, 6, 1> error;
     Eigen::Matrix<double, 6, 1> x;
     Eigen::Matrix<double, 6, 1> x_target;
     Eigen::Vector3d u;
@@ -103,6 +131,9 @@ private:
 
     Eigen::Matrix<double, 6, 6> Q;
     Eigen::Matrix<double, 3, 3> R;
+
+    Eigen::Vector3d desired_position;
+    Eigen::Vector3d desired_velocity;
     
 
     rclcpp::Subscription<mission_interface::msg::SensorState>::SharedPtr measured_plant_state_sub;
