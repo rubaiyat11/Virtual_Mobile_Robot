@@ -23,6 +23,7 @@ target_include_directories(mpc_controller_node PUBLIC /usr/include/eigen3)
 
 install(TARGETS
   mpc_controller_node
+  lqr_controller_node
   DESTINATION lib/${PROJECT_NAME}
 )
 

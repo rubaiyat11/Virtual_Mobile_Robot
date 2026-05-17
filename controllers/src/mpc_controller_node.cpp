@@ -9,15 +9,15 @@ public:
     mpc_controller_node() : Node("mpc_controller_node"){
         measured_plant_state_sub = this->create_subscription<mission_interface::msg::SensorState>(
             "/measured_state", 20, std::bind(&mpc_controller_node::measured_state_callback, this, std::placeholders::_1)
-        );              //Taking data from sensor node
+        );
 
         target_state_sub = this->create_subscription<mission_interface::msg::TargetState>(
             "/target_state", 20, std::bind(&mpc_controller_node::target_state_callback, this, std::placeholders::_1)
-        );              //Taking data from user command
+        ); 
 
         mpc_output_pub = this->create_publisher<mission_interface::msg::DesiredState>(
             "/desired_state", 20
-        );              //Sending data for optimal state 
+        );   
 
         mpc_pub_timer = this->create_wall_timer(
             std::chrono::milliseconds(10),
@@ -86,14 +86,10 @@ private:
     void compute_mpc(){
         error = x_target - x;
 
-        u = Eigen::Vector3d(
-        error(0) * 2.0,
-        error(1) * 2.0,
-        error(2) * 2.0
-    );
+        u =  k * error;
 
-    desired_position = x.head<3>() + x.tail<3>() * dt;
-    desired_velocity = x.tail<3>() + u * dt;
+        desired_position = x.head<3>() + x.tail<3>() * dt;
+        desired_velocity = x.tail<3>() + u * dt;
 
     }
 
