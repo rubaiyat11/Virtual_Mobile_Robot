@@ -84,18 +84,25 @@ private:
     }
 
     void compute_mpc(){
-        error = x_target - x;
+        Eigen::Matrix<double, 6, 1> x_pred = x;
 
-        u =  k * error;
+        for(int i = 0; i< H; i++){
+            x_pred = A * x_pred + B * u;
 
-        desired_position = x.head<3>() + x.tail<3>() * dt;
-        desired_velocity = x.tail<3>() + u * dt;
+
+        };
 
     }
 
     void timer_callback(){
 
         compute_mpc();
+
+        Eigen::Matrix<double, 6, 1> pred_error;
+        pred_error = x_target - x_pred;
+
+        cost += pred_error.transpose() * Q * pred_error;
+        cost += u.transpose() * R * u;
 
         mission_interface::msg::DesiredState msg;
 
@@ -116,6 +123,8 @@ private:
 
 
     double dt = 0.01;
+    double H = 10.0;
+    double cost = 0.0;
 
     Eigen::Matrix<double, 6, 1> error;
     Eigen::Matrix<double, 6, 1> x;

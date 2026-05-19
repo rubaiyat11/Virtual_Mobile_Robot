@@ -15,6 +15,7 @@ public:
     }
 
 private:
+
     rclcpp::Subscription<mission_interface::msg::DesiredState>::SharedPtr desired_state_sub;
     rclcpp::Publisher<mission_interface::msg::AdjustedState>::SharedPtr adjusted_state_pub;
 };

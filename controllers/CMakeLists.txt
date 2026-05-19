@@ -12,9 +12,16 @@ find_package(mission_interface REQUIRED)
 find_package(Eigen3 REQUIRED)
 
 add_executable(mpc_controller_node src/mpc_controller_node.cpp)
+add_executable(lqr_controller_node src/lqr_controller_node.cpp)
 
 ament_target_dependencies(
   mpc_controller_node
+  rclcpp
+  mission_interface
+)
+
+ament_target_dependencies(
+  lqr_controller_node
   rclcpp
   mission_interface
 )
