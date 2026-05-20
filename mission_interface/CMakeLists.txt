@@ -17,6 +17,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/TargetState.msg"
   "msg/DesiredState.msg"
   "msg/AdjustedState.msg"
+  "msg/ControlEffort.msg"
   DEPENDENCIES builtin_interfaces geometry_msgs
 )
 

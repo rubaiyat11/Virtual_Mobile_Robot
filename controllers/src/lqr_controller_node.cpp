@@ -16,6 +16,17 @@ public:
 
 private:
 
+    void desired_state_callback(const mission_interface::msg::DesiredState::SharedPtr msg){
+
+        x(0) = msg->desired_position[0];
+        x(1) = msg->desired_position[1];
+        x(2) = msg->desired_position[2];
+
+        x(3) = msg->desired_velocity[0];
+        x(4) = msg->desired_velocity[1];
+        x(5) = msg->desired_velocity[2];
+    }
+
     rclcpp::Subscription<mission_interface::msg::DesiredState>::SharedPtr desired_state_sub;
     rclcpp::Publisher<mission_interface::msg::AdjustedState>::SharedPtr adjusted_state_pub;
 };

@@ -13,6 +13,7 @@ find_package(Eigen3 REQUIRED)
 
 add_executable(mpc_controller_node src/mpc_controller_node.cpp)
 add_executable(lqr_controller_node src/lqr_controller_node.cpp)
+add_executable(pid_controller_node src/pid_controller_node.cpp)
 
 ament_target_dependencies(
   mpc_controller_node
@@ -22,6 +23,12 @@ ament_target_dependencies(
 
 ament_target_dependencies(
   lqr_controller_node
+  rclcpp
+  mission_interface
+)
+
+ament_target_dependencies(
+  pid_controller_node
   rclcpp
   mission_interface
 )
@@ -31,6 +38,7 @@ target_include_directories(mpc_controller_node PUBLIC /usr/include/eigen3)
 install(TARGETS
   mpc_controller_node
   lqr_controller_node
+  pid_controller_node
   DESTINATION lib/${PROJECT_NAME}
 )
 
