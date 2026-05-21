@@ -12,6 +12,11 @@ public:
         adjusted_state_pub = this->create_publisher<mission_interface::msg::AdjustedState>(
             "/adjusted_state", 20
         );
+
+        lqr_pub_timer = this->create_wall_timer(
+            std::chrono::milliseconds(10),
+            std::bind(&lqr_controller_node::timer_callback, this)
+        );
     }
 
 private:
@@ -27,8 +32,13 @@ private:
         x(5) = msg->desired_velocity[2];
     }
 
+    void timer_callback(){
+        //LQR loop and cost functions
+    }
+
     rclcpp::Subscription<mission_interface::msg::DesiredState>::SharedPtr desired_state_sub;
     rclcpp::Publisher<mission_interface::msg::AdjustedState>::SharedPtr adjusted_state_pub;
+    rclcpp::TimerBase::SharedPtr lqr_pub_timer;
 };
 
 int main(int argc, char **argv){
