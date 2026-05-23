@@ -1,0 +1,14 @@
+#Goal
+float64[3] target_position
+float64[3] target_velocity
+float64 position_tolerance
+float64 velocity_tolerance
+
+---
+#result
+bool success
+string message
+---
+#Feedback
+float64[3] current_position
+float64 distance_remaining
