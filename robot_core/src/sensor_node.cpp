@@ -12,14 +12,9 @@ public:
             "/plant_state", 10, std::bind(&sensor_node::plant_state_reciever, this, std::placeholders::_1)
         );
 
-        rclcpp::QoS qos(10);
-        qos.reliability(RMW_QOS_POLICY_RELIABILITY_BEST_EFFORT);
-
         measured_state_pub = this->create_publisher<mission_interface::msg::SensorState>(
-            "/measured_state", qos
+            "/measured_state", 10
         );
-
-        RCLCPP_INFO(this->get_logger(), "Sensor node working");
     
         measured_state_updater = this->create_wall_timer(
             std::chrono::milliseconds(50),
@@ -31,46 +26,44 @@ private:
 
     void plant_state_reciever(const mission_interface::msg::RobotState::SharedPtr msg){
 
-        measured_position.x() = msg->position[0];
-        measured_position.y() = msg->position[1];
-        measured_position.z() = msg->position[2];
+        actual_position.x() = msg->position[0];
+        actual_position.y() = msg->position[1];
+        actual_position.z() = msg->position[2];
 
-        measured_velocity.x() = msg->velocity[0];
-        measured_velocity.y() = msg->velocity[1];
-        measured_velocity.z() = msg->velocity[2];
+        actual_velocity.x() = msg->velocity[0];
+        actual_velocity.y() = msg->velocity[1];
+        actual_velocity.z() = msg->velocity[2];
+
+        actual_acceleration.x() = msg->acceleration[0];
+        actual_acceleration.y() = msg->acceleration[1];
+        actual_acceleration.z() = msg->acceleration[2];
 
     }
 
     void timer_callback(){
         mission_interface::msg::SensorState msg;
 
-        double noise_sample = noise(engine);
+        msg.stamp = this->get_clock()->now();
 
-        measured_position.x() += noise_sample;
-        measured_position.y() += noise_sample;
-        measured_position.z() += noise_sample;
+        msg.measured_position[0] = actual_position.x() + noise(engine);
+        msg.measured_position[1] = actual_position.y() + noise(engine);
+        msg.measured_position[2] = actual_position.z() + noise(engine);
 
-        measured_velocity.x() += noise_sample;
-        measured_velocity.y() += noise_sample;
-        measured_velocity.z() += noise_sample;
+        msg.measured_velocity[0] = actual_velocity.x() + noise(engine);
+        msg.measured_velocity[1] = actual_velocity.y() + noise(engine);
+        msg.measured_velocity[2] = actual_velocity.z() + noise(engine);
 
-        msg.measured_position[0] = measured_position.x();
-        msg.measured_position[1] = measured_position.y();
-        msg.measured_position[2] = measured_position.z();
-
-        msg.measured_velocity[0] = measured_velocity.x();
-        msg.measured_velocity[1] = measured_velocity.y();
-        msg.measured_velocity[2] = measured_velocity.z();
+        msg.measured_acceleration[0] = actual_acceleration.x() + noise(engine);
+        msg.measured_acceleration[1] = actual_acceleration.y() + noise(engine);
+        msg.measured_acceleration[2] = actual_acceleration.z() + noise(engine);
 
         measured_state_pub->publish(msg);
         
-        msg.stamp = this->get_clock()->now();
-
-        RCLCPP_INFO(this->get_logger(), "Pos: x=%f, y=%f, z=%f", measured_position.x(), measured_position.y(), measured_position.z());
     }
 
-    Eigen::Vector3d measured_position{0.0, 0.0, 0.0};
-    Eigen::Vector3d measured_velocity{0.0, 0.0, 0.0};
+    Eigen::Vector3d actual_position{0.0, 0.0, 0.0};
+    Eigen::Vector3d actual_velocity{0.0, 0.0, 0.0};
+    Eigen::Vector3d actual_acceleration{0.0, 0.0, 0.0};
     
     std::random_device rd;
     std::default_random_engine engine{rd()};

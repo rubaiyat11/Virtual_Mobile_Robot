@@ -48,7 +48,8 @@ private:
 
         plant_state_pub->publish(msg);
 
-        RCLCPP_INFO(this->get_logger(), "Pos: x=%f, y=%f, z=%f", position.x(), position.y(), position.z());
+        RCLCPP_INFO_THROTTLE(this->get_logger(), *this->get_clock(), 500, 
+                    "Pos: x=%.2f, y=%.2f, z=%.2f", position.x(), position.y(), position.z());
     }
 
     Eigen::Vector3d position{0.0, 0.0, 0.0};
@@ -57,7 +58,7 @@ private:
     Eigen::Vector3d force{0.0, 0.0, 0.0};
 
     double m = 1.0;
-    double dt = 0.1;
+    double dt = 0.01;
 
     rclcpp::Subscription<mission_interface::msg::RobotState>::SharedPtr controller_sub;
     rclcpp::Publisher<mission_interface::msg::RobotState>::SharedPtr plant_state_pub;

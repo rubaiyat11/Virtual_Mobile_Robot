@@ -24,6 +24,7 @@ setup(
     },
     entry_points={
         'console_scripts': [
+            "planner_node = planning.planner_node:main"
         ],
     },
 )

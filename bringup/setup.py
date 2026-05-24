@@ -10,6 +10,10 @@ setup(
         ('share/ament_index/resource_index/packages',
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
+        (
+            'share/bringup/launch',
+            ['bringup/launch_file.py'],
+        )
     ],
     install_requires=['setuptools'],
     zip_safe=True,
@@ -24,6 +28,7 @@ setup(
     },
     entry_points={
         'console_scripts': [
+            "launch_file = bringup.launch_file:main"
         ],
     },
 )

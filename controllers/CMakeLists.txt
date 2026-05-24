@@ -9,7 +9,6 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(mission_interface REQUIRED)
-find_package(Eigen3 REQUIRED)
 
 add_executable(mpc_controller_node src/mpc_controller_node.cpp)
 add_executable(lqr_controller_node src/lqr_controller_node.cpp)
@@ -34,6 +33,8 @@ ament_target_dependencies(
 )
 
 target_include_directories(mpc_controller_node PUBLIC /usr/include/eigen3)
+target_include_directories(lqr_controller_node PUBLIC /usr/include/eigen3)
+target_include_directories(pid_controller_node PUBLIC /usr/include/eigen3)
 
 install(TARGETS
   mpc_controller_node

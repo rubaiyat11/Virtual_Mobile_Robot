@@ -24,6 +24,8 @@ setup(
     },
     entry_points={
         'console_scripts': [
+            "mission_manager_server = mission_system.mission_manager_server:main",
+            "mission_client_node = mission_system.mission_client_node:main"
         ],
     },
 )
