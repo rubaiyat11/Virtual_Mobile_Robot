@@ -1,5 +1,8 @@
+//I Realized it is too complicated to stack mpc->lqr->pid controllers in this pipeline. The physics is not making sense. So left the project for now.
+//Will work on it after i have enough skill to execute it. (that is if its possible)
+
 #include "rclcpp/rclcpp.hpp"
-#include "mission_interface/msg/adjusted_state.hpp"
+#include "mission_interface/msg/target_state.hpp"
 #include "mission_interface/msg/robot_state.hpp"
 #include "mission_interface/msg/sensor_state.hpp"
 #include <Eigen/Dense>
@@ -8,9 +11,9 @@
 class pid_controller_node : public rclcpp::Node {
 public:
     pid_controller_node() : Node("pid_controller_node") {
-        
-        adjusted_state_sub = this->create_subscription<mission_interface::msg::AdjustedState>(
-            "/adjusted_state", 20, std::bind(&pid_controller_node::adjusted_state_callback, this, std::placeholders::_1)
+
+        target_state_sub = this->create_subscription<mission_interface::msg::TargetState>(
+            "/target_state", 20, std::bind(&pid_controller_node::target_state_callback, this, std::placeholders::_1)
         );
 
         
@@ -45,11 +48,11 @@ public:
     }
 
 private:
-    void adjusted_state_callback(const mission_interface::msg::AdjustedState::SharedPtr msg) {
+    void target_state_callback(const mission_interface::msg::TargetState::SharedPtr msg) {
         
-        a_target(0) = msg->adjusted_acceleration[0];
-        a_target(1) = msg->adjusted_acceleration[1];
-        a_target(2) = msg->adjusted_acceleration[2];
+        a_target(0) = msg->target_position[0];
+        a_target(1) = msg->target_position[1];
+        a_target(2) = msg->target_position[2];
     }
 
     void measured_state_callback(const mission_interface::msg::SensorState::SharedPtr msg) {
@@ -78,17 +81,16 @@ private:
         }
 
         Eigen::Vector3d u_pid = Kp.cwiseProduct(error) + Ki.cwiseProduct(integral_error) + Kd.cwiseProduct(derivative_error);
-        Eigen::Vector3d force_command = u_pid * mass;
 
         mission_interface::msg::RobotState out_msg;
-        out_msg.force[0] = force_command(0);
-        out_msg.force[1] = force_command(1);
-        out_msg.force[2] = force_command(2);
+        out_msg.position[0] = u_pid(0);
+        out_msg.position[1] = u_pid(1);
+        out_msg.position[2] = u_pid(2);
 
         control_effort_pub->publish(out_msg);
     }
 
-    rclcpp::Subscription<mission_interface::msg::AdjustedState>::SharedPtr adjusted_state_sub;
+    rclcpp::Subscription<mission_interface::msg::TargetState>::SharedPtr target_state_sub;
     rclcpp::Subscription<mission_interface::msg::SensorState>::SharedPtr measured_state_sub;
     rclcpp::Publisher<mission_interface::msg::RobotState>::SharedPtr control_effort_pub;
     rclcpp::TimerBase::SharedPtr pid_pub_timer;

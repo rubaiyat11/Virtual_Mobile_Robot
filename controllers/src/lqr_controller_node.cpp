@@ -78,9 +78,6 @@ private:
         out_msg.adjusted_acceleration[2] = adjusted_acceleration(2);
 
         adjusted_state_pub->publish(out_msg);
-
-        RCLCPP_INFO_THROTTLE(this->get_logger(), *this->get_clock(), 500, 
-            "LQR Output X: %.2f | Error X: %.2f", u_lqr(0), x_error(0));
     }
 
     rclcpp::Subscription<mission_interface::msg::DesiredState>::SharedPtr desired_state_sub;

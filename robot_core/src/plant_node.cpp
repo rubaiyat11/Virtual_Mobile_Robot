@@ -22,29 +22,25 @@ public:
     }
 private:
     void control_input_callback(const mission_interface::msg::RobotState::SharedPtr msg){
-        force.x() = msg->force[0];
-        force.y() = msg->force[1];
-        force.z() = msg->force[2];   //F: latest_force
+        position.x() = msg->position[0];
+        position.y() = msg->position[1];
+        position.z() = msg->position[2];
     }
 
     void timer_callback(){
         mission_interface::msg::RobotState msg;
 
-        acceleration = force/m;             //m: mass of system, a: updated_acceleration
-        velocity = velocity + acceleration * dt;      //v: velocity, dt: time frame
-        position = position + velocity * dt;      //x: updated_position
+        //velocity = velocity + acceleration * dt;      //v: velocity, dt: time frame
+        position = position; //+ velocity * dt;      //x: updated_position
 
         msg.position[0] = position.x();
         msg.position[1] = position.y();
         msg.position[2] = position.z();
 
-        msg.velocity[0] = velocity.x();
-        msg.velocity[1] = velocity.y();
-        msg.velocity[2] = velocity.z();
+        //msg.velocity[0] = velocity.x();
+        //msg.velocity[1] = velocity.y();
+        //msg.velocity[2] = velocity.z();
 
-        msg.acceleration[0] = acceleration.x();
-        msg.acceleration[1] = acceleration.y();
-        msg.acceleration[2] = acceleration.z();
 
         plant_state_pub->publish(msg);
 
